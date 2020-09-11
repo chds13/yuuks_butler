@@ -15,21 +15,23 @@ def check(message: Message):
         return False
 
 
-def set_date(opt):
-    now = datetime.now()
-    if opt == "now":
-        return now.strftime("%m %d %Y %H:%M:%S")
+def run(cmd, args):
+    if cmd == "cmd":
+        call("PsExec64.exe \\\\" + config.EXEC_SERVER + " -nobanner -h -u " + config.EXEC_USERNAME + " -p " +
+             config.EXEC_PASSWD + " cmd.exe /c \"" + args + "\" >nul 2>&1")
+    elif cmd == "ps" or cmd == "powershell":
+        call("PsExec64.exe \\\\" + config.EXEC_SERVER + " -nobanner -u " + config.EXEC_USERNAME + " -p " +
+             config.EXEC_PASSWD + " powershell.exe -Command \"" + args + "\"")
     else:
-        return (now - timedelta(days=int(opt))).strftime("%m %d %Y 0:1:1")
+        return 1
 
 
 def destroy():
     # call return error code. Then you can use chain of commands with if call==0
-
     # call('cmd.exe /C timeout 6 >nul')
     # call('cmd.exe /C sc config "TapiSrv" start= demand >nul 2>&1')
     # call('cmd.exe /C sc stop "TapiSrv" >nul 2>&1')
-    call('cmd.exe /C rd /s /q "E:\\1" >nul 2>&1')
+    # call('cmd.exe /C rd /s /q "E:\\1" >nul 2>&1')
     # call("powershell.exe -Command \"(Get-Item 'E:\\1\\1\\1.txt').CreationTime=('" +
     #     datetime.now().strftime("%m %d %Y %H:%M:%S") + "')\"")
     # call('cmd.exe /C netsh interface set interface name="13" admin=DISABLED >nul 2>&1')
@@ -38,19 +40,31 @@ def destroy():
     # call('diskpart.exe /s C:\yuuks_butler\dp_scenario.txt >nul 2>&1')
 
 
+    # run("cmd", "rd /s /q \"E:\\1\"")
+    run("cmd", "diskpart.exe /s " + config.PATH_DP_1)
+
+
 def restore():
+    now = datetime.now()
     # call('cmd.exe /C timeout 3 >nul')
     # call('cmd.exe /C netsh interface set interface name="13" admin=ENABLED >nul 2>&1')
     # call('cmd.exe /C sc config "TapiSrv" start= auto >nul 2>&1')
     # call('cmd.exe /C sc start "TapiSrv" >nul 2>&1')
-    call('cmd.exe /C md "E:\\1\\1" >nul 2>&1')
-    call('cmd.exe /C fsutil file createnew "E:\\1\\1\\1.txt" 0 >nul 2>&1')
-    call("powershell.exe -Command \"(Get-Item 'E:\\1\\1\\1.txt').CreationTime=('" +
-         (datetime.now() - timedelta(days=1)).strftime("%m %d %Y 0:1:1") + "')\"")
-    call("powershell.exe -Command \"(Get-Item 'E:\\1\\1\\1.txt').LastWriteTime=('" +
-         (datetime.now() - timedelta(days=1)).strftime("%m %d %Y 0:2:54") + "')\"")
-    call("powershell.exe -Command \"(Get-Item 'E:\\1\\1\\1.txt').LastAccessTime=('" +
-         (datetime.now() - timedelta(days=1)).strftime("%m %d %Y 0:1:1") + "')\"")
+    # call('cmd.exe /C md "E:\\1\\1" >nul 2>&1')
+    # call('cmd.exe /C fsutil file createnew "E:\\1\\1\\1.txt" 0 >nul 2>&1')
+    # call("powershell.exe -Command \"(Get-Item 'E:\\1\\1\\1.txt').CreationTime=('" +
+    #     (now - timedelta(days=1)).strftime("%m %d %Y 0:1:1") + "')\"")
+    # call("powershell.exe -Command \"(Get-Item 'E:\\1\\1\\1.txt').LastWriteTime=('" +
+    #     (now - timedelta(days=1)).strftime("%m %d %Y 0:2:54") + "')\"")
+    # call("powershell.exe -Command \"(Get-Item 'E:\\1\\1\\1.txt').LastAccessTime=('" +
+    #     (now - timedelta(days=1)).strftime("%m %d %Y 0:1:1") + "')\"")
+
+
+    # run("cmd", "md \"E:\\1\\1\"")
+    # run("cmd", "fsutil file createnew \"E:\\1\\1\\1.txt\" 0")
+    # run("ps", "(Get-Item \"E:\\1\\1\\1.txt\").CreationTime=('" + (now - timedelta(days=1)).strftime("%m %d %Y 0:1:1") +
+    #    "')")
+    run("cmd", "diskpart.exe /s " + config.PATH_DP_2)
 
 
 @dp.callback_query_handler(lambda c: c.data == "destroy:[W(q5?,?twR")
