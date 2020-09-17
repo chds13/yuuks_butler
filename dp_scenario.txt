@@ -1,3 +1,0 @@
-select volume 3
-remove letter=L
-assign letter=E
